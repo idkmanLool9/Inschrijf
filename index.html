@@ -4,136 +4,218 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Datum reserveren — Morephrem</title>
-  <meta name="description" content="Kies een beschikbare datum in de agenda en vraag jullie zaal of huwelijk aan bij Morephrem." />
+  <meta name="description" content="Reserveer in een paar stappen jullie datum bij Morephrem: kies het type, een beschikbare dag en verstuur je aanvraag." />
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
   <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
-  <!-- ======================= HEADER (Apple-stijl, translucent) ======================= -->
+  <!-- ======================= HEADER ======================= -->
   <header class="bar">
     <div class="container bar-inner">
       <a class="back" href="https://morephrem.com" aria-label="Terug naar morephrem.com">
         <span class="chev">‹</span> morephrem.com
       </a>
       <span class="bar-brand">Morephrem</span>
-      <button class="theme-toggle" id="themeToggle" aria-label="Wissel donker/licht thema">
-        <svg class="ic ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="4.2"></circle>
-          <path d="M12 2.5v2.2M12 19.3v2.2M4.4 4.4l1.6 1.6M18 18l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.4 19.6l1.6-1.6M18 6l1.6-1.6"></path>
-        </svg>
-        <svg class="ic ic-moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
-        </svg>
-      </button>
+      <div class="bar-right">
+        <a class="bar-link" href="#aanvragen">Mijn aanvragen</a>
+        <button class="theme-toggle" id="themeToggle" aria-label="Wissel donker/licht thema">
+          <svg class="ic ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4.2"></circle>
+            <path d="M12 2.5v2.2M12 19.3v2.2M4.4 4.4l1.6 1.6M18 18l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.4 19.6l1.6-1.6M18 6l1.6-1.6"></path>
+          </svg>
+          <svg class="ic ic-moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
+          </svg>
+        </button>
+      </div>
     </div>
   </header>
 
-  <main>
-    <!-- ======================= INTRO ======================= -->
-    <section class="intro container">
-      <h1>Reserveer jullie datum</h1>
-      <p class="lead">
-        Kies een beschikbare dag in de agenda en verstuur je aanvraag —
-        voor een huwelijk, feest of het huren van de zaal.
-        Vrijblijvend; we bevestigen binnen twee werkdagen.
-      </p>
-    </section>
+  <main class="wizard container">
+    <!-- ===================== VOORTGANG ===================== -->
+    <nav class="stepper" id="stepper" aria-label="Voortgang">
+      <div class="stepper-track"><div class="stepper-fill" id="stepperFill"></div></div>
+      <ol class="stepper-nodes">
+        <li class="snode" data-step="type"><button type="button" data-goto="type"><span class="snum">1</span><span class="slabel">Type</span></button></li>
+        <li class="snode" data-step="datum"><button type="button" data-goto="datum"><span class="snum">2</span><span class="slabel">Datum</span></button></li>
+        <li class="snode" data-step="gegevens"><button type="button" data-goto="gegevens"><span class="snum">3</span><span class="slabel">Gegevens</span></button></li>
+        <li class="snode" data-step="controleren"><button type="button" data-goto="controleren"><span class="snum">4</span><span class="slabel">Controleren</span></button></li>
+      </ol>
+    </nav>
 
-    <div class="container layout">
-      <!-- ===================== AGENDA ===================== -->
-      <section class="card calendar-card" aria-label="Agenda">
-        <div class="calendar-header">
-          <h2 class="cal-title" id="calTitle" aria-live="polite">Maand</h2>
-          <div class="cal-controls">
-            <button class="cal-nav" id="prevMonth" aria-label="Vorige maand">‹</button>
-            <button class="cal-nav" id="nextMonth" aria-label="Volgende maand">›</button>
-          </div>
-        </div>
+    <div class="steps" id="steps">
 
-        <div class="calendar-weekdays">
-          <span>ma</span><span>di</span><span>wo</span><span>do</span>
-          <span>vr</span><span>za</span><span>zo</span>
-        </div>
-        <div class="calendar-grid" id="calGrid"></div>
+      <!-- ---------- STAP 1: TYPE ---------- -->
+      <section class="step" data-step="type" hidden>
+        <header class="step-head">
+          <p class="step-kicker">Stap 1 van 4</p>
+          <h1 class="step-title">Waarvoor reserveren jullie?</h1>
+          <p class="step-sub">Kies waar de aanvraag over gaat.</p>
+        </header>
 
-        <div class="calendar-legend">
-          <span class="legend-item"><i class="dot dot-available"></i> Beschikbaar</span>
-          <span class="legend-item"><i class="dot dot-booked"></i> Bezet</span>
-          <span class="legend-item"><i class="dot dot-selected"></i> Gekozen</span>
+        <div class="type-grid" id="typeGrid">
+          <button type="button" class="type-card" data-value="Huwelijk / bruiloft">
+            <span class="type-ic" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-6.5-4.35-9-8.5C1.6 8.9 3.2 6 6.2 6c1.9 0 3.1 1.1 3.8 2.1.7-1 1.9-2.1 3.8-2.1 3 0 4.6 2.9 3.2 5.5C18.5 15.65 12 20 12 20z"/></svg>
+            </span>
+            <span class="type-name">Huwelijk / bruiloft</span>
+            <span class="type-desc">Ceremonie of trouwfeest</span>
+            <span class="type-check" aria-hidden="true">✓</span>
+          </button>
+
+          <button type="button" class="type-card" data-value="Zaal huren">
+            <span class="type-ic" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V9l8-5 8 5v12"/><path d="M9 21v-6h6v6"/><path d="M4 21h16"/></svg>
+            </span>
+            <span class="type-name">Zaal huren</span>
+            <span class="type-desc">Voor een eigen invulling</span>
+            <span class="type-check" aria-hidden="true">✓</span>
+          </button>
+
+          <button type="button" class="type-card" data-value="Feest / receptie">
+            <span class="type-ic" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.7 4.3L18 9l-4.3 1.7L12 15l-1.7-4.3L6 9l4.3-1.7z"/><path d="M18.5 14.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/></svg>
+            </span>
+            <span class="type-name">Feest / receptie</span>
+            <span class="type-desc">Verjaardag, jubileum, borrel</span>
+            <span class="type-check" aria-hidden="true">✓</span>
+          </button>
+
+          <button type="button" class="type-card" data-value="Anders">
+            <span class="type-ic" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
+            </span>
+            <span class="type-name">Anders</span>
+            <span class="type-desc">Iets anders in gedachten</span>
+            <span class="type-check" aria-hidden="true">✓</span>
+          </button>
         </div>
       </section>
 
-      <!-- ===================== AANVRAAGPANEEL ===================== -->
-      <section class="card panel">
-        <div class="chosen">
-          <span class="chosen-label">Gekozen datum</span>
-          <p class="chosen-date" id="selectionDate">Nog geen datum gekozen</p>
+      <!-- ---------- STAP 2: DATUM ---------- -->
+      <section class="step" data-step="datum" hidden>
+        <header class="step-head">
+          <p class="step-kicker">Stap 2 van 4</p>
+          <h1 class="step-title">Kies een datum</h1>
+          <p class="step-sub">Groen omcirkelde dagen zijn beschikbaar.</p>
+        </header>
+
+        <div class="card calendar-card">
+          <div class="calendar-header">
+            <h2 class="cal-title" id="calTitle" aria-live="polite">Maand</h2>
+            <div class="cal-controls">
+              <button class="cal-nav" id="prevMonth" aria-label="Vorige maand">‹</button>
+              <button class="cal-nav" id="nextMonth" aria-label="Volgende maand">›</button>
+            </div>
+          </div>
+          <div class="calendar-weekdays">
+            <span>ma</span><span>di</span><span>wo</span><span>do</span><span>vr</span><span>za</span><span>zo</span>
+          </div>
+          <div class="calendar-grid" id="calGrid"></div>
+          <div class="calendar-legend">
+            <span class="legend-item"><i class="dot dot-available"></i> Beschikbaar</span>
+            <span class="legend-item"><i class="dot dot-booked"></i> Bezet</span>
+            <span class="legend-item"><i class="dot dot-selected"></i> Gekozen</span>
+          </div>
         </div>
 
-        <form class="request-form" id="bookingForm" novalidate>
+        <div class="chosen-inline" id="chosenInline" hidden>
+          <span class="chosen-label">Gekozen datum</span>
+          <span class="chosen-date" id="selectionDate"></span>
+        </div>
+
+        <div class="step-actions">
+          <button type="button" class="btn btn-secondary" data-goto="type">Vorige</button>
+          <button type="button" class="btn" data-next="datum" id="datumNext" disabled>Volgende</button>
+        </div>
+      </section>
+
+      <!-- ---------- STAP 3: GEGEVENS ---------- -->
+      <section class="step" data-step="gegevens" hidden>
+        <header class="step-head">
+          <p class="step-kicker">Stap 3 van 4</p>
+          <h1 class="step-title">Jullie gegevens</h1>
+          <p class="step-sub">Zodat we contact kunnen opnemen om te bevestigen.</p>
+        </header>
+
+        <form class="card request-form" id="bookingForm" novalidate>
           <div class="field">
             <label for="fName">Naam</label>
-            <input type="text" id="fName" name="name" placeholder="Voor- en achternaam" required />
+            <input type="text" id="fName" name="name" placeholder="Voor- en achternaam" autocomplete="name" required />
           </div>
-
-          <div class="field">
-            <label for="fEventType">Waarvoor?</label>
-            <select id="fEventType" name="eventType" required>
-              <option value="Huwelijk / bruiloft">Huwelijk / bruiloft</option>
-              <option value="Zaal huren">Zaal huren</option>
-              <option value="Feest / receptie">Feest / receptie</option>
-              <option value="Anders">Anders</option>
-            </select>
-          </div>
-
           <div class="field-row">
             <div class="field">
               <label for="fEmail">E-mail</label>
-              <input type="email" id="fEmail" name="email" placeholder="naam@voorbeeld.nl" required />
+              <input type="email" id="fEmail" name="email" placeholder="naam@voorbeeld.nl" autocomplete="email" required />
             </div>
             <div class="field">
               <label for="fPhone">Telefoon</label>
-              <input type="tel" id="fPhone" name="phone" placeholder="06 …" />
+              <input type="tel" id="fPhone" name="phone" placeholder="06 …" autocomplete="tel" />
             </div>
           </div>
-
-          <div class="field-row">
-            <div class="field">
-              <label for="fDate">Datum</label>
-              <input type="date" id="fDate" name="date" required />
-            </div>
-            <div class="field">
-              <label for="fGuests">Aantal gasten</label>
-              <input type="number" id="fGuests" name="guests" min="1" max="500" placeholder="bv. 80" />
-            </div>
-          </div>
-
           <div class="field">
-            <label for="fMessage">Opmerking</label>
+            <label for="fGuests">Aantal gasten <span class="opt">(optioneel)</span></label>
+            <input type="number" id="fGuests" name="guests" min="1" max="500" placeholder="bv. 80" />
+          </div>
+          <div class="field">
+            <label for="fMessage">Opmerking <span class="opt">(optioneel)</span></label>
             <textarea id="fMessage" name="message" rows="3" placeholder="Eventuele wensen of vragen…"></textarea>
           </div>
-
           <p class="form-error" id="formError" role="alert" hidden></p>
-          <button type="submit" class="btn btn-block">Aanvraag versturen</button>
-          <p class="form-note">Verplicht: naam, e-mail en datum.</p>
-        </form>
 
-        <!-- Bevestiging -->
-        <div class="confirmation" id="confirmation" hidden>
-          <div class="confirmation-icon" aria-hidden="true">✓</div>
-          <h3>Aanvraag ontvangen</h3>
-          <p id="confirmationText"></p>
-          <button class="btn btn-secondary btn-block" id="newRequestBtn">Nieuwe aanvraag</button>
+          <div class="step-actions">
+            <button type="button" class="btn btn-secondary" data-goto="datum">Vorige</button>
+            <button type="submit" class="btn" data-next="gegevens">Volgende</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- ---------- STAP 4: CONTROLEREN ---------- -->
+      <section class="step" data-step="controleren" hidden>
+        <header class="step-head">
+          <p class="step-kicker">Stap 4 van 4</p>
+          <h1 class="step-title">Controleer je aanvraag</h1>
+          <p class="step-sub">Klopt alles? Dan versturen we hem.</p>
+        </header>
+
+        <div class="card review" id="reviewList"><!-- gevuld via JS --></div>
+
+        <div class="step-actions">
+          <button type="button" class="btn btn-secondary" data-goto="gegevens">Vorige</button>
+          <button type="button" class="btn" data-next="controleren" id="confirmBtn">Aanvraag versturen</button>
         </div>
       </section>
-    </div>
 
-    <!-- ===================== JOUW AANVRAGEN ===================== -->
-    <section class="container requests-section">
-      <h2 class="requests-title">Jouw aanvragen</h2>
-      <div id="requestsList" class="requests-list"></div>
-    </section>
+      <!-- ---------- KLAAR ---------- -->
+      <section class="step step-done" data-step="klaar" hidden>
+        <div class="success">
+          <svg class="success-check" viewBox="0 0 52 52" aria-hidden="true">
+            <circle class="sc-circle" cx="26" cy="26" r="24" />
+            <path class="sc-tick" d="M15 27l7 7 15-15" />
+          </svg>
+          <h1 class="step-title">Aanvraag verstuurd</h1>
+          <p class="step-sub" id="confirmationText"></p>
+          <div class="done-actions">
+            <button type="button" class="btn" id="newRequestBtn">Nieuwe aanvraag</button>
+            <a class="btn btn-secondary" href="https://morephrem.com">Terug naar morephrem.com</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- MIJN AANVRAGEN ---------- -->
+      <section class="step" data-step="aanvragen" hidden>
+        <header class="step-head">
+          <h1 class="step-title">Mijn aanvragen</h1>
+          <p class="step-sub">Aanvragen die op dit apparaat zijn gemaakt.</p>
+        </header>
+        <div id="requestsList" class="requests-list"></div>
+        <div class="step-actions center">
+          <button type="button" class="btn" data-goto="type">Nieuwe aanvraag starten</button>
+        </div>
+      </section>
+
+    </div>
   </main>
 
   <footer class="foot">
