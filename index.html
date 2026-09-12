@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Landgoed Bloesemhof — Trouwlocatie & Zaalverhuur</title>
+  <meta name="description" content="Boek Landgoed Bloesemhof voor jullie bruiloft. Bekijk de beschikbaarheid in de agenda, kies een datum en vraag jullie dag direct aan." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <!-- ======================= NAVIGATIE ======================= -->
+  <header class="site-header" id="top">
+    <div class="container nav-inner">
+      <a href="#top" class="brand">
+        <span class="brand-mark">✦</span>
+        <span class="brand-name">Landgoed&nbsp;Bloesemhof</span>
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="Menu openen" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="nav" id="nav">
+        <a href="#home">Home</a>
+        <a href="#over">De locatie</a>
+        <a href="#beschikbaarheid">Beschikbaarheid</a>
+        <a href="#boeken">Aanvragen</a>
+        <a href="#contact">Contact</a>
+        <a href="#beschikbaarheid" class="btn btn-small nav-cta">Datum kiezen</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ======================= HERO ======================= -->
+  <section class="hero" id="home">
+    <div class="hero-overlay"></div>
+    <div class="container hero-content">
+      <p class="eyebrow">Trouwlocatie &amp; Zaalverhuur</p>
+      <h1>Waar jullie mooiste dag<br />werkelijkheid wordt</h1>
+      <p class="hero-sub">
+        Een sfeervol landgoed voor bruiloften en ceremonies. Bekijk de agenda,
+        kies jullie droomdatum en vraag de dag in een paar klikken aan.
+      </p>
+      <div class="hero-actions">
+        <a href="#beschikbaarheid" class="btn">Bekijk beschikbaarheid</a>
+        <a href="#over" class="btn btn-ghost">Ontdek de locatie</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= OVER DE LOCATIE ======================= -->
+  <section class="section" id="over">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">Over de locatie</p>
+        <h2>Ruimte, sfeer en alles onder één dak</h2>
+        <p class="section-intro">
+          Van een intieme ceremonie tot een groots trouwfeest — Bloesemhof biedt
+          de ruimte en de rust om jullie dag onvergetelijk te maken.
+        </p>
+      </div>
+
+      <div class="features">
+        <article class="feature">
+          <div class="feature-icon">👥</div>
+          <h3>Tot 180 gasten</h3>
+          <p>Een lichte feestzaal met flexibele opstelling voor diner, borrel of feest.</p>
+        </article>
+        <article class="feature">
+          <div class="feature-icon">💐</div>
+          <h3>Ceremonie in de tuin</h3>
+          <p>Trouw buiten tussen de bloesembomen of binnen in de sfeervolle serre.</p>
+        </article>
+        <article class="feature">
+          <div class="feature-icon">🍽️</div>
+          <h3>Eigen keuken</h3>
+          <p>Diner, buffet en hapjes volledig op maat verzorgd door ons team.</p>
+        </article>
+        <article class="feature">
+          <div class="feature-icon">🚗</div>
+          <h3>Parkeren &amp; overnachten</h3>
+          <p>Ruime parkeergelegenheid en gastenkamers voor het bruidspaar.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= BESCHIKBAARHEID / AGENDA ======================= -->
+  <section class="section section-alt" id="beschikbaarheid">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">Agenda</p>
+        <h2>Kies jullie datum</h2>
+        <p class="section-intro">
+          Groene dagen zijn beschikbaar. Klik op een datum om deze te selecteren
+          en verder te gaan met jullie aanvraag.
+        </p>
+      </div>
+
+      <div class="calendar-wrap">
+        <div class="calendar-card">
+          <div class="calendar-header">
+            <button class="cal-nav" id="prevMonth" aria-label="Vorige maand">‹</button>
+            <h3 class="cal-title" id="calTitle" aria-live="polite">Maand</h3>
+            <button class="cal-nav" id="nextMonth" aria-label="Volgende maand">›</button>
+          </div>
+
+          <div class="calendar-weekdays">
+            <span>ma</span><span>di</span><span>wo</span><span>do</span>
+            <span>vr</span><span>za</span><span>zo</span>
+          </div>
+          <div class="calendar-grid" id="calGrid"></div>
+
+          <div class="calendar-legend">
+            <span class="legend-item"><i class="dot dot-available"></i> Beschikbaar</span>
+            <span class="legend-item"><i class="dot dot-booked"></i> Bezet</span>
+            <span class="legend-item"><i class="dot dot-selected"></i> Gekozen</span>
+          </div>
+        </div>
+
+        <aside class="selection-card" id="selectionCard">
+          <p class="eyebrow">Gekozen datum</p>
+          <p class="selection-date" id="selectionDate">Nog geen datum gekozen</p>
+          <p class="selection-hint" id="selectionHint">
+            Selecteer hierboven een beschikbare (groene) dag in de agenda.
+          </p>
+          <a href="#boeken" class="btn btn-block" id="toFormBtn" hidden>Ga verder met aanvragen →</a>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= BOEKEN / AANVRAAGFORMULIER ======================= -->
+  <section class="section" id="boeken">
+    <div class="container narrow">
+      <div class="section-head">
+        <p class="eyebrow">Aanvragen</p>
+        <h2>Vraag jullie dag aan</h2>
+        <p class="section-intro">
+          Vul jullie gegevens in. Wij nemen binnen 2 werkdagen contact op om de
+          aanvraag te bevestigen. Er zijn nog geen kosten verbonden aan een aanvraag.
+        </p>
+      </div>
+
+      <form class="booking-form" id="bookingForm" novalidate>
+        <div class="field-row">
+          <div class="field">
+            <label for="fName">Naam bruidspaar *</label>
+            <input type="text" id="fName" name="name" placeholder="bv. Sanne &amp; Daan" required />
+          </div>
+          <div class="field">
+            <label for="fEventType">Type gelegenheid *</label>
+            <select id="fEventType" name="eventType" required>
+              <option value="Huwelijk / bruiloft">Huwelijk / bruiloft</option>
+              <option value="Ceremonie">Alleen ceremonie</option>
+              <option value="Trouwfeest / receptie">Trouwfeest / receptie</option>
+              <option value="Anders">Anders</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="fEmail">E-mailadres *</label>
+            <input type="email" id="fEmail" name="email" placeholder="naam@voorbeeld.nl" required />
+          </div>
+          <div class="field">
+            <label for="fPhone">Telefoonnummer</label>
+            <input type="tel" id="fPhone" name="phone" placeholder="06 12 34 56 78" />
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="fDate">Gekozen datum *</label>
+            <input type="date" id="fDate" name="date" required />
+            <small class="field-help">Tip: kies je datum makkelijk via de agenda hierboven.</small>
+          </div>
+          <div class="field">
+            <label for="fGuests">Aantal gasten *</label>
+            <input type="number" id="fGuests" name="guests" min="1" max="180" placeholder="bv. 80" required />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="fMessage">Wensen of vragen</label>
+          <textarea id="fMessage" name="message" rows="4" placeholder="Vertel ons over jullie plannen, dagindeling, catering-wensen…"></textarea>
+        </div>
+
+        <p class="form-error" id="formError" role="alert" hidden></p>
+
+        <button type="submit" class="btn btn-block">Aanvraag versturen</button>
+      </form>
+
+      <!-- Bevestiging na versturen -->
+      <div class="confirmation" id="confirmation" hidden>
+        <div class="confirmation-icon">✓</div>
+        <h3>Aanvraag ontvangen!</h3>
+        <p id="confirmationText">Bedankt voor jullie aanvraag.</p>
+        <button class="btn btn-ghost" id="newRequestBtn">Nieuwe aanvraag</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= MIJN AANVRAGEN ======================= -->
+  <section class="section section-alt" id="aanvragen">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">Overzicht</p>
+        <h2>Jullie aanvragen</h2>
+        <p class="section-intro">
+          Hier zie je alle aanvragen die op dit apparaat zijn gemaakt.
+        </p>
+      </div>
+      <div id="requestsList" class="requests-list">
+        <!-- gevuld via JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= CONTACT / FOOTER ======================= -->
+  <footer class="site-footer" id="contact">
+    <div class="container footer-grid">
+      <div>
+        <a href="#top" class="brand brand-footer">
+          <span class="brand-mark">✦</span>
+          <span class="brand-name">Landgoed Bloesemhof</span>
+        </a>
+        <p class="footer-tagline">Trouwlocatie &amp; zaalverhuur in het groene hart.</p>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <p>Bloesemlaan 12<br />1234 AB&nbsp;&nbsp;Bloemendal</p>
+        <p><a href="tel:+31201234567">020 - 123 45 67</a><br />
+           <a href="mailto:info@bloesemhof.nl">info@bloesemhof.nl</a></p>
+      </div>
+      <div>
+        <h4>Openingstijden bezichtiging</h4>
+        <p>Do – vr: 13:00 – 18:00<br />Za: 10:00 – 16:00<br />Op afspraak</p>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <p>© <span id="year"></span> Landgoed Bloesemhof. Demo-website.</p>
+    </div>
+  </footer>
+
+  <!-- Toast melding -->
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
