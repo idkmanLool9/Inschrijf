@@ -199,6 +199,9 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.022em; line-height:
 .type-card.selected .type-check { opacity: 1; transform: scale(1); }
 
 /* ---------- step 2: calendar ---------- */
+.calendar-card { max-width: 460px; margin-inline: auto; }
+.step[data-step="datum"] .step-actions,
+.step[data-step="datum"] .chosen-inline { max-width: 460px; margin-inline: auto; }
 .calendar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.1rem; }
 .cal-title { text-transform: capitalize; font-size: 1.35rem; }
 .cal-controls { display: flex; gap: .5rem; }
@@ -211,30 +214,50 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.022em; line-height:
 .cal-nav:disabled { opacity: .3; cursor: default; }
 .calendar-weekdays, .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
 .calendar-weekdays { margin-bottom: 8px; text-align: center; text-transform: uppercase; letter-spacing: .04em; font-size: .72rem; font-weight: 500; color: var(--muted); }
+/* iOS-agenda gevoel: minimale cijfers, gekozen dag als gevulde cirkel,
+   vandaag in accentkleur, bezette dagen met een stipje eronder. */
 .day {
-  aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; border-radius: 50%;
-  font-size: 1rem; position: relative; font-variant-numeric: tabular-nums; color: var(--ink);
-  transition: background .15s var(--ease), color .15s var(--ease), transform .12s var(--ease);
+  aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center;
+  position: relative; font-variant-numeric: tabular-nums;
 }
 .day.empty { visibility: hidden; }
-.day.available { cursor: pointer; box-shadow: inset 0 0 0 1.5px var(--ok); }
-.day.available:hover { background: var(--ok); color: #fff; box-shadow: none; }
-.day.available:active { transform: scale(0.9); }
-.day.available:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--ring); }
-.day.booked { color: var(--busy); text-decoration: line-through; text-decoration-thickness: 1px; cursor: not-allowed; }
-.day.past { color: var(--faint); }
-.day.today { font-weight: 600; }
-.day.selected {
-  background: var(--accent) !important; color: var(--on-accent) !important; box-shadow: none !important;
-  font-weight: 500; animation: pop .28s var(--ease);
+.dnum {
+  width: 82%; aspect-ratio: 1/1; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: clamp(.92rem, 2.4vw, 1.06rem); font-weight: 400; color: var(--ink);
+  transition: background .18s var(--ease), color .18s var(--ease), transform .14s var(--ease);
 }
-@keyframes pop { 0% { transform: scale(0.8); } 60% { transform: scale(1.12); } 100% { transform: scale(1); } }
-.calendar-legend { display: flex; flex-wrap: wrap; gap: 1.2rem; margin-top: 1.4rem; padding-top: 1.1rem; border-top: 1px solid var(--line-soft); font-size: .82rem; color: var(--muted); }
-.legend-item { display: inline-flex; align-items: center; gap: .45rem; }
-.dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
-.dot-available { border: 2px solid var(--ok); }
-.dot-booked { background: var(--busy); }
+.day.available { cursor: pointer; }
+.day.available:hover .dnum { background: var(--fill); }
+.day.available:active .dnum { transform: scale(0.88); }
+.day.available:focus-visible { outline: none; }
+.day.available:focus-visible .dnum { box-shadow: 0 0 0 3px var(--ring); }
+.day.today .dnum { color: var(--accent); font-weight: 600; }
+.day.past .dnum { color: var(--faint); }
+.day.booked { cursor: not-allowed; }
+.day.booked .dnum { color: var(--faint); }
+.day.booked::after {
+  content: ""; position: absolute; bottom: 5%; left: 50%; transform: translateX(-50%);
+  width: 5px; height: 5px; border-radius: 50%; background: var(--busy);
+}
+.day.selected .dnum {
+  background: var(--accent); color: var(--on-accent); font-weight: 500;
+  animation: pop .3s var(--ease);
+}
+.day.selected.today .dnum { color: var(--on-accent); }
+@keyframes pop { 0% { transform: scale(0.85); } 60% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
+/* zachte overgang bij bladeren tussen maanden */
+@keyframes gridNext { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: none; } }
+@keyframes gridPrev { from { opacity: 0; transform: translateX(-16px); } to { opacity: 1; transform: none; } }
+.calendar-grid.to-next { animation: gridNext .26s var(--ease); }
+.calendar-grid.to-prev { animation: gridPrev .26s var(--ease); }
+
+.calendar-legend { display: flex; flex-wrap: wrap; gap: 1.3rem; margin-top: 1.3rem; padding-top: 1.1rem; border-top: 1px solid var(--line-soft); font-size: .82rem; color: var(--muted); }
+.legend-item { display: inline-flex; align-items: center; gap: .5rem; }
+.dot { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
 .dot-selected { background: var(--accent); }
+.dot-busy { background: var(--busy); }
 
 .chosen-inline { text-align: center; margin-top: 18px; display: flex; flex-direction: column; gap: .15rem; }
 .chosen-label { text-transform: uppercase; letter-spacing: .05em; font-size: .7rem; font-weight: 600; color: var(--muted); }

@@ -197,7 +197,7 @@
   // =========================================================
   function currentMonthStart() { var m = new Date(); m.setDate(1); m.setHours(0,0,0,0); return m; }
 
-  function renderCalendar() {
+  function renderCalendar(dir) {
     var year = viewDate.getFullYear(), month = viewDate.getMonth();
     calTitle.textContent = MONTHS_NL[month] + " " + year;
     prevBtn.disabled = viewDate <= currentMonthStart();
@@ -213,7 +213,9 @@
     for (var day = 1; day <= daysInMonth; day++) {
       var cellDate = new Date(year, month, day), iso = isoDate(cellDate);
       var cell = document.createElement("div");
-      cell.className = "day"; cell.textContent = day;
+      cell.className = "day";
+      var num = document.createElement("span"); num.className = "dnum"; num.textContent = day;
+      cell.appendChild(num);
       if (iso === todayISO) cell.classList.add("today");
 
       if (cellDate < today) {
@@ -234,6 +236,9 @@
       if (iso === state.date) cell.classList.add("selected");
       calGrid.appendChild(cell);
     }
+
+    calGrid.classList.remove("to-next", "to-prev");
+    if (dir) { void calGrid.offsetWidth; calGrid.classList.add(dir === "next" ? "to-next" : "to-prev"); }
   }
 
   function selectDate(iso) {
@@ -409,10 +414,10 @@
 
     prevBtn.addEventListener("click", function () {
       if (prevBtn.disabled) return;
-      viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1); renderCalendar();
+      viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1); renderCalendar("prev");
     });
     nextBtn.addEventListener("click", function () {
-      viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1); renderCalendar();
+      viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1); renderCalendar("next");
     });
 
     initTypeCards();
