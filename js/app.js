@@ -1,28 +1,25 @@
 /* =========================================================
-   Landgoed Bloesemhof — front-end logica
+   Morephrem — Datum reserveren
    - Interactieve agenda (kalender) met datumselectie
-   - Boekingsaanvragen opgeslagen in localStorage
+   - Aanvragen opgeslagen in localStorage (dit apparaat)
    ========================================================= */
 
 (function () {
   "use strict";
 
-  // ---------- constanten ----------
-  var STORAGE_KEY = "bloesemhof_bookings_v1";
+  var STORAGE_KEY = "morephrem_datum_v1";
   var MONTHS_NL = [
     "januari", "februari", "maart", "april", "mei", "juni",
     "juli", "augustus", "september", "oktober", "november", "december"
   ];
   var DAYS_NL = ["zondag", "maandag", "dinsdag", "woensdag", "donderdag", "vrijdag", "zaterdag"];
 
-  // Voorbeeld: een paar dagen die al "bezet" zijn, zodat de agenda realistisch oogt.
-  // Deze worden relatief ten opzichte van vandaag gegenereerd.
+  // Voorbeeld: een paar reeds bezette dagen zodat de agenda realistisch oogt.
+  // Verwijder deze functie-inhoud (return []) om met een lege agenda te starten.
   function seedBlockedDates() {
     var today = new Date();
     var blocked = [];
-    // een aantal willekeurige-ogende bezette zaterdagen de komende maanden
-    var offsets = [12, 26, 47, 61, 75, 96, 110];
-    offsets.forEach(function (d) {
+    [12, 26, 47, 61, 75, 96, 110].forEach(function (d) {
       var dt = new Date(today.getFullYear(), today.getMonth(), today.getDate() + d);
       blocked.push(isoDate(dt));
     });
@@ -30,20 +27,18 @@
   }
 
   // ---------- state ----------
-  var viewDate = new Date();          // welke maand tonen we
+  var viewDate = new Date();
   viewDate.setDate(1);
-  var selectedISO = null;             // gekozen datum (YYYY-MM-DD)
+  var selectedISO = null;
   var blockedDates = seedBlockedDates();
   var bookings = loadBookings();
 
-  // ---------- DOM refs ----------
+  // ---------- DOM ----------
   var calGrid       = document.getElementById("calGrid");
   var calTitle      = document.getElementById("calTitle");
   var prevBtn       = document.getElementById("prevMonth");
   var nextBtn       = document.getElementById("nextMonth");
   var selectionDate = document.getElementById("selectionDate");
-  var selectionHint = document.getElementById("selectionHint");
-  var toFormBtn     = document.getElementById("toFormBtn");
   var form          = document.getElementById("bookingForm");
   var fDate         = document.getElementById("fDate");
   var formError     = document.getElementById("formError");
@@ -64,8 +59,8 @@
   }
 
   function parseISO(iso) {
-    var parts = iso.split("-");
-    return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+    var p = iso.split("-");
+    return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
   }
 
   function formatLongNL(iso) {
@@ -83,17 +78,12 @@
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
       return raw ? JSON.parse(raw) : [];
-    } catch (e) {
-      return [];
-    }
+    } catch (e) { return []; }
   }
 
   function saveBookings() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings));
-    } catch (e) {
-      /* opslag niet beschikbaar — negeer stil */
-    }
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings)); }
+    catch (e) { /* opslag niet beschikbaar */ }
   }
 
   function isDateTaken(iso) {
@@ -104,7 +94,6 @@
   function showToast(msg) {
     toast.textContent = msg;
     toast.hidden = false;
-    // force reflow zodat de transitie speelt
     void toast.offsetWidth;
     toast.classList.add("show");
     clearTimeout(showToast._t);
@@ -117,16 +106,25 @@
   // =========================================================
   //  Kalender
   // =========================================================
+  function currentMonthStart() {
+    var m = new Date();
+    m.setDate(1);
+    m.setHours(0, 0, 0, 0);
+    return m;
+  }
+
   function renderCalendar() {
     var year = viewDate.getFullYear();
     var month = viewDate.getMonth();
     calTitle.textContent = MONTHS_NL[month] + " " + year;
 
+    // "vorige maand" uitschakelen wanneer we in de huidige maand zitten
+    prevBtn.disabled = viewDate <= currentMonthStart();
+
     calGrid.innerHTML = "";
 
-    // welke weekdag is de 1e? (maandag = start). JS: 0=zo..6=za
     var firstDay = new Date(year, month, 1).getDay();
-    var leading = (firstDay + 6) % 7; // aantal lege cellen vóór dag 1
+    var leading = (firstDay + 6) % 7;               // maandag als eerste kolom
     var daysInMonth = new Date(year, month + 1, 0).getDate();
     var today = startOfToday();
     var todayISO = isoDate(today);
@@ -150,7 +148,7 @@
         cell.classList.add("past");
       } else if (isDateTaken(iso)) {
         cell.classList.add("booked");
-        cell.title = "Deze datum is niet meer beschikbaar";
+        cell.title = "Niet meer beschikbaar";
       } else {
         cell.classList.add("available");
         cell.setAttribute("role", "button");
@@ -165,7 +163,6 @@
       }
 
       if (iso === selectedISO) cell.classList.add("selected");
-
       calGrid.appendChild(cell);
     }
   }
@@ -173,14 +170,12 @@
   function selectDate(iso) {
     selectedISO = iso;
     selectionDate.textContent = formatLongNL(iso);
-    selectionHint.textContent = "Mooie keuze! Ga verder om jullie aanvraag te versturen.";
-    toFormBtn.hidden = false;
     if (fDate) fDate.value = iso;
     renderCalendar();
   }
 
   // =========================================================
-  //  Boekingsformulier
+  //  Aanvraagformulier
   // =========================================================
   function handleSubmit(e) {
     e.preventDefault();
@@ -192,26 +187,23 @@
       email:     form.email.value.trim(),
       phone:     form.phone.value.trim(),
       date:      form.date.value,
-      guests:    form.guests.value,
+      guests:    form.guests.value.trim(),
       message:   form.message.value.trim()
     };
 
-    // validatie
-    if (!data.name || !data.email || !data.date || !data.guests) {
-      return showError("Vul alle verplichte velden (*) in.");
+    if (!data.name || !data.email || !data.date) {
+      return showError("Vul je naam, e-mail en een datum in.");
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
       return showError("Vul een geldig e-mailadres in.");
     }
-    var chosen = parseISO(data.date);
-    if (chosen < startOfToday()) {
+    if (parseISO(data.date) < startOfToday()) {
       return showError("Kies een datum in de toekomst.");
     }
     if (isDateTaken(data.date)) {
-      return showError("Helaas, deze datum is inmiddels bezet. Kies een andere dag in de agenda.");
+      return showError("Deze datum is inmiddels bezet. Kies een andere dag in de agenda.");
     }
 
-    // opslaan
     var booking = {
       id: "bk_" + Date.now(),
       name: data.name,
@@ -227,23 +219,20 @@
     bookings.push(booking);
     saveBookings();
 
-    // UI bijwerken
     form.hidden = true;
     confirmText.textContent =
-      "Bedankt " + data.name + "! Jullie aanvraag voor " + formatLongNL(data.date) +
+      "Bedankt " + data.name + "! Je aanvraag voor " + formatLongNL(data.date) +
       " is ontvangen. We nemen binnen 2 werkdagen contact op via " + data.email + ".";
     confirmation.hidden = false;
     selectedISO = null;
     renderCalendar();
     renderRequests();
     showToast("Aanvraag opgeslagen ✓");
-    confirmation.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
   function showError(msg) {
     formError.textContent = msg;
     formError.hidden = false;
-    formError.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
   function resetForm() {
@@ -251,8 +240,6 @@
     form.hidden = false;
     confirmation.hidden = true;
     selectionDate.textContent = "Nog geen datum gekozen";
-    selectionHint.textContent = "Selecteer hierboven een beschikbare (groene) dag in de agenda.";
-    toFormBtn.hidden = true;
   }
 
   // =========================================================
@@ -264,42 +251,39 @@
     if (!bookings.length) {
       var empty = document.createElement("p");
       empty.className = "requests-empty";
-      empty.textContent = "Er zijn nog geen aanvragen gemaakt op dit apparaat.";
+      empty.textContent = "Nog geen aanvragen gemaakt op dit apparaat.";
       requestsList.appendChild(empty);
       return;
     }
 
-    // sorteer op datum
-    var sorted = bookings.slice().sort(function (a, b) {
-      return a.date < b.date ? -1 : 1;
-    });
+    bookings.slice().sort(function (a, b) { return a.date < b.date ? -1 : 1; })
+      .forEach(function (b) {
+        var card = document.createElement("div");
+        card.className = "request-card";
 
-    sorted.forEach(function (b) {
-      var card = document.createElement("div");
-      card.className = "request-card";
+        var info = document.createElement("div");
+        info.className = "request-info";
+        var h = document.createElement("h4");
+        h.textContent = b.name;
+        var meta = document.createElement("p");
+        var guestsTxt = b.guests ? " · " + b.guests + " gasten" : "";
+        meta.textContent = formatLongNL(b.date) + " · " + b.eventType + guestsTxt;
+        var badge = document.createElement("span");
+        badge.className = "request-badge";
+        badge.textContent = b.status;
+        info.appendChild(h);
+        info.appendChild(meta);
+        info.appendChild(badge);
 
-      var info = document.createElement("div");
-      info.className = "request-info";
-      var h = document.createElement("h4");
-      h.textContent = b.name;
-      var meta = document.createElement("p");
-      meta.textContent = formatLongNL(b.date) + " · " + b.eventType + " · " + b.guests + " gasten";
-      var badge = document.createElement("span");
-      badge.className = "request-badge";
-      badge.textContent = b.status;
-      info.appendChild(h);
-      info.appendChild(meta);
-      info.appendChild(badge);
+        var cancel = document.createElement("button");
+        cancel.className = "request-cancel";
+        cancel.textContent = "Annuleren";
+        cancel.addEventListener("click", function () { cancelBooking(b.id); });
 
-      var cancel = document.createElement("button");
-      cancel.className = "request-cancel";
-      cancel.textContent = "Annuleren";
-      cancel.addEventListener("click", function () { cancelBooking(b.id); });
-
-      card.appendChild(info);
-      card.appendChild(cancel);
-      requestsList.appendChild(card);
-    });
+        card.appendChild(info);
+        card.appendChild(cancel);
+        requestsList.appendChild(card);
+      });
   }
 
   function cancelBooking(id) {
@@ -314,54 +298,24 @@
   }
 
   // =========================================================
-  //  Navigatie (mobiel menu) + jaartal
-  // =========================================================
-  function initNav() {
-    var toggle = document.getElementById("navToggle");
-    var nav = document.getElementById("nav");
-    if (toggle && nav) {
-      toggle.addEventListener("click", function () {
-        var open = nav.classList.toggle("open");
-        toggle.setAttribute("aria-expanded", open ? "true" : "false");
-      });
-      nav.querySelectorAll("a").forEach(function (link) {
-        link.addEventListener("click", function () {
-          nav.classList.remove("open");
-          toggle.setAttribute("aria-expanded", "false");
-        });
-      });
-    }
-    var yearEl = document.getElementById("year");
-    if (yearEl) yearEl.textContent = new Date().getFullYear();
-  }
-
-  // =========================================================
   //  Init
   // =========================================================
   function init() {
-    // kalender kan niet vóór de huidige maand
     prevBtn.addEventListener("click", function () {
-      var minMonth = new Date();
-      minMonth.setDate(1);
-      minMonth.setHours(0, 0, 0, 0);
-      var candidate = new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1);
-      if (candidate >= minMonth) {
-        viewDate = candidate;
-        renderCalendar();
-      }
+      if (prevBtn.disabled) return;
+      viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1);
+      renderCalendar();
     });
     nextBtn.addEventListener("click", function () {
       viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1);
       renderCalendar();
     });
 
-    // formulier: geen datums in verleden toestaan
     if (fDate) fDate.min = isoDate(startOfToday());
 
     form.addEventListener("submit", handleSubmit);
     newRequestBtn.addEventListener("click", resetForm);
 
-    initNav();
     renderCalendar();
     renderRequests();
   }
