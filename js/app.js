@@ -14,9 +14,30 @@
   var DAYS_NL   = ["zondag","maandag","dinsdag","woensdag","donderdag","vrijdag","zaterdag"];
 
   // Volgorde van de wizard-stappen (voor voortgang + richting van de animatie)
-  var FLOW  = ["type", "datum", "gegevens", "controleren"];
+  var FLOW  = ["type", "datum", "arrangement", "gegevens", "controleren"];
   var EXTRA = ["klaar", "aanvragen"];
   var ALL   = FLOW.concat(EXTRA);
+
+  // --- Arrangementen & extra's (voorbeeldinhoud — pas namen/prijzen hier aan) ---
+  var PACKAGES = [
+    { id: "zaal",     name: "Alleen zaalhuur",      from: 1200, desc: "De ruimte, jullie vullen zelf in.",
+      incl: ["Zaal & basisinrichting", "Open tot middernacht", "Eigen catering toegestaan", "Ruim parkeren"] },
+    { id: "diner",    name: "Diner & Feest",         from: 2950, desc: "Diner met aansluitend feest.",
+      incl: ["Sfeervolle zaal tot 01:00", "3-gangen diner", "Bediening & bar", "Basis aankleding"] },
+    { id: "compleet", name: "Compleet — hele dag",   from: 5200, desc: "Van ceremonie tot laatste dans.",
+      incl: ["Exclusief gebruik locatie", "Ceremonie + diner + feest", "Bruidssuite inbegrepen", "Coördinatie op de dag"] },
+    { id: "maat",     name: "Op maat",               from: null, desc: "Wij maken een persoonlijk voorstel.",
+      incl: ["Volledig naar wens", "Vrijblijvend advies"] }
+  ];
+  var EXTRAS = [
+    { id: "muziek",  name: "Live muziek / DJ",         price: 650 },
+    { id: "foto",    name: "Fotograaf",                price: 900 },
+    { id: "suite",   name: "Overnachting bruidssuite", price: 250 },
+    { id: "bloemen", name: "Aankleding & bloemen",     price: 450 }
+  ];
+  function pkgById(id) { return PACKAGES.find(function (p) { return p.id === id; }); }
+  function extraById(id) { return EXTRAS.find(function (x) { return x.id === id; }); }
+  function formatEur(n) { return "€ " + Number(n).toLocaleString("nl-NL"); }
 
   // Voorbeeld: enkele reeds bezette dagen (return [] voor een lege agenda)
   function seedBlockedDates() {
@@ -33,7 +54,7 @@
   var bookings = loadBookings();
   var submitted = false;
   var rendered = null;           // laatst getoonde stap
-  var state = { eventType: null, date: null, name: "", email: "", phone: "", guests: "", message: "" };
+  var state = { eventType: null, date: null, package: null, extras: [], name: "", email: "", phone: "", guests: "", message: "" };
 
   // ---------- DOM ----------
   var $ = function (id) { return document.getElementById(id); };
@@ -42,6 +63,7 @@
   var calGrid = $("calGrid"), calTitle = $("calTitle"), prevBtn = $("prevMonth"), nextBtn = $("nextMonth");
   var selectionDate = $("selectionDate"), chosenInline = $("chosenInline");
   var datumNext = $("datumNext"), typeGrid = $("typeGrid");
+  var pkgList = $("pkgList"), extraList = $("extraList"), priceEst = $("priceEst"), arrangementNext = $("arrangementNext");
   var form = $("bookingForm"), formError = $("formError");
   var reviewList = $("reviewList"), confirmText = $("confirmationText");
   var requestsList = $("requestsList");
@@ -93,8 +115,9 @@
     switch (step) {
       case "type":        return true;
       case "datum":       return !!state.eventType;
-      case "gegevens":    return !!state.eventType && !!state.date;
-      case "controleren": return !!state.eventType && !!state.date && gegevensComplete();
+      case "arrangement": return !!state.eventType && !!state.date;
+      case "gegevens":    return !!state.eventType && !!state.date && !!state.package;
+      case "controleren": return !!state.eventType && !!state.date && !!state.package && gegevensComplete();
       case "klaar":       return submitted;
       case "aanvragen":   return true;
       default:            return false;
@@ -150,6 +173,7 @@
 
     // per-stap voorbereiden
     if (step === "datum")       { renderCalendar(); refreshChosen(); }
+    if (step === "arrangement") { renderArrangement(); }
     if (step === "gegevens")    { fillForm(); }
     if (step === "controleren") { renderReview(); }
     if (step === "aanvragen")   { renderRequests(); }
@@ -189,6 +213,87 @@
   function markTypeSelection() {
     Array.prototype.forEach.call(typeGrid.children, function (c) {
       c.classList.toggle("selected", c.getAttribute("data-value") === state.eventType);
+    });
+  }
+
+  // =========================================================
+  //  Stap 3 — arrangement + extra's
+  // =========================================================
+  function priceEstimate() {
+    var pkg = pkgById(state.package);
+    if (!pkg) return null;
+    var extrasTotal = state.extras.reduce(function (s, id) {
+      var e = extraById(id); return s + (e ? e.price : 0);
+    }, 0);
+    if (pkg.from == null) return { custom: true, extras: extrasTotal };
+    return { total: pkg.from + extrasTotal, extras: extrasTotal };
+  }
+
+  function updatePriceEst() {
+    var est = priceEstimate();
+    if (!est) { priceEst.textContent = ""; priceEst.classList.remove("show"); return; }
+    priceEst.classList.add("show");
+    if (est.custom) {
+      priceEst.innerHTML = '<span class="pe-label">Indicatie</span><span class="pe-val">In overleg</span>';
+    } else {
+      priceEst.innerHTML = '<span class="pe-label">Indicatie</span><span class="pe-val">vanaf ' + formatEur(est.total) + '</span>';
+    }
+  }
+
+  function renderArrangement() {
+    // pakketten
+    pkgList.innerHTML = "";
+    PACKAGES.forEach(function (p) {
+      var card = document.createElement("button");
+      card.type = "button";
+      card.className = "pkg-card" + (p.id === state.package ? " selected" : "");
+      card.setAttribute("data-pkg", p.id);
+
+      var top = '<div class="pkg-top"><span class="pkg-name">' + p.name + '</span>' +
+                '<span class="pkg-price">' + (p.from == null ? "In overleg" : "vanaf " + formatEur(p.from)) + '</span></div>';
+      var desc = '<p class="pkg-desc">' + p.desc + '</p>';
+      var incl = '<ul class="pkg-incl">' + p.incl.map(function (i) {
+        return '<li><span class="tick">✓</span>' + i + '</li>';
+      }).join("") + '</ul>';
+      card.innerHTML = top + desc + incl + '<span class="pkg-check" aria-hidden="true">✓</span>';
+      pkgList.appendChild(card);
+    });
+
+    // extra's
+    extraList.innerHTML = "";
+    EXTRAS.forEach(function (x) {
+      var checked = state.extras.indexOf(x.id) !== -1;
+      var label = document.createElement("label");
+      label.className = "extra-row";
+      label.innerHTML =
+        '<input type="checkbox" data-extra="' + x.id + '"' + (checked ? " checked" : "") + ' />' +
+        '<span class="extra-name">' + x.name + '</span>' +
+        '<span class="extra-price">+ ' + formatEur(x.price) + '</span>';
+      extraList.appendChild(label);
+    });
+
+    if (arrangementNext) arrangementNext.disabled = !state.package;
+    updatePriceEst();
+  }
+
+  function initArrangement() {
+    pkgList.addEventListener("click", function (e) {
+      var card = e.target.closest(".pkg-card");
+      if (!card) return;
+      state.package = card.getAttribute("data-pkg");
+      Array.prototype.forEach.call(pkgList.children, function (c) {
+        c.classList.toggle("selected", c === card);
+      });
+      if (arrangementNext) arrangementNext.disabled = false;
+      updatePriceEst();
+    });
+    extraList.addEventListener("change", function (e) {
+      var cb = e.target.closest('input[type="checkbox"]');
+      if (!cb) return;
+      var id = cb.getAttribute("data-extra");
+      if (cb.checked) { if (state.extras.indexOf(id) === -1) state.extras.push(id); }
+      else { state.extras = state.extras.filter(function (x) { return x !== id; }); }
+      updatePriceEst();
     });
   }
 
@@ -287,21 +392,26 @@
   //  Stap 4 — controleren
   // =========================================================
   function renderReview() {
+    var pkg = pkgById(state.package);
+    var extrasNames = state.extras.map(function (id) {
+      var e = extraById(id); return e ? e.name : id;
+    });
     var rows = [
-      { key: "Type",     val: state.eventType,               edit: "type" },
-      { key: "Datum",    val: state.date ? formatLongNL(state.date) : "—", edit: "datum" },
-      { key: "Naam",     val: state.name,                    edit: "gegevens" },
-      { key: "E-mail",   val: state.email,                   edit: "gegevens" },
-      { key: "Telefoon", val: state.phone || "—",            edit: "gegevens" },
-      { key: "Gasten",   val: state.guests || "—",           edit: "gegevens" },
-      { key: "Opmerking",val: state.message || "—",          edit: "gegevens" }
+      { key: "Type",       val: state.eventType,               edit: "type" },
+      { key: "Datum",      val: state.date ? formatLongNL(state.date) : "—", edit: "datum" },
+      { key: "Arrangement",val: pkg ? pkg.name : "—",           edit: "arrangement" },
+      { key: "Extra’s",    val: extrasNames.length ? extrasNames.join(", ") : "Geen", edit: "arrangement" },
+      { key: "Naam",       val: state.name,                    edit: "gegevens" },
+      { key: "E-mail",     val: state.email,                   edit: "gegevens" },
+      { key: "Telefoon",   val: state.phone || "—",            edit: "gegevens" },
+      { key: "Gasten",     val: state.guests || "—",           edit: "gegevens" },
+      { key: "Opmerking",  val: state.message || "—",          edit: "gegevens" }
     ];
     reviewList.innerHTML = "";
     rows.forEach(function (r) {
       var row = document.createElement("div"); row.className = "review-row";
       var k = document.createElement("span"); k.className = "review-key"; k.textContent = r.key;
-      var right = document.createElement("div");
-      right.style.display = "flex"; right.style.alignItems = "center"; right.style.gap = ".6rem";
+      var right = document.createElement("div"); right.className = "review-right";
       var v = document.createElement("span"); v.className = "review-val"; v.textContent = r.val;
       var edit = document.createElement("button"); edit.className = "review-edit"; edit.type = "button";
       edit.textContent = "Wijzig"; edit.addEventListener("click", function () { goTo(r.edit); });
@@ -309,6 +419,17 @@
       row.appendChild(k); row.appendChild(right);
       reviewList.appendChild(row);
     });
+
+    // prijsindicatie
+    var est = priceEstimate();
+    if (est) {
+      var pr = document.createElement("div"); pr.className = "review-row review-total";
+      var pk = document.createElement("span"); pk.className = "review-key"; pk.textContent = "Prijsindicatie";
+      var pv = document.createElement("span"); pv.className = "review-val price";
+      pv.textContent = est.custom ? "In overleg" : "vanaf " + formatEur(est.total);
+      pr.appendChild(pk); pr.appendChild(pv);
+      reviewList.appendChild(pr);
+    }
   }
 
   function submitBooking() {
@@ -317,10 +438,16 @@
       showToast("Deze datum is inmiddels bezet.");
       state.date = null; goTo("datum"); return;
     }
+    var pkg = pkgById(state.package);
+    var est = priceEstimate();
     var booking = {
       id: "bk_" + Date.now(),
       name: state.name, eventType: state.eventType, email: state.email,
       phone: state.phone, date: state.date, guests: state.guests, message: state.message,
+      package: pkg ? pkg.name : "", extras: state.extras.map(function (id) {
+        var e = extraById(id); return e ? e.name : id;
+      }),
+      priceFrom: est && !est.custom ? est.total : null,
       status: "Aangevraagd", createdAt: new Date().toISOString()
     };
     bookings.push(booking);
@@ -328,14 +455,16 @@
     submitted = true;
     confirmText.textContent =
       "Bedankt " + state.name + "! Je aanvraag voor " + formatLongNL(state.date) +
-      " is ontvangen. We nemen binnen 2 werkdagen contact op via " + state.email + ".";
+      (pkg ? " (" + pkg.name + ")" : "") +
+      " is ontvangen. We nemen binnen 2 werkdagen contact op via " + state.email +
+      " met een voorstel op maat.";
     showToast("Aanvraag opgeslagen ✓");
     goTo("klaar");
   }
 
   function resetFlow() {
     submitted = false;
-    state = { eventType: null, date: null, name: "", email: "", phone: "", guests: "", message: "" };
+    state = { eventType: null, date: null, package: null, extras: [], name: "", email: "", phone: "", guests: "", message: "" };
     markTypeSelection();
     if (form) form.reset();
     goTo("type");
@@ -356,7 +485,9 @@
       var info = document.createElement("div"); info.className = "request-info";
       var h = document.createElement("h4"); h.textContent = b.name;
       var meta = document.createElement("p");
-      meta.textContent = formatLongNL(b.date) + " · " + b.eventType + (b.guests ? " · " + b.guests + " gasten" : "");
+      meta.textContent = formatLongNL(b.date) + " · " + b.eventType +
+        (b.package ? " · " + b.package : "") +
+        (b.guests ? " · " + b.guests + " gasten" : "");
       var badge = document.createElement("span"); badge.className = "request-badge"; badge.textContent = b.status;
       info.appendChild(h); info.appendChild(meta); info.appendChild(badge);
       var cancel = document.createElement("button"); cancel.className = "request-cancel";
@@ -399,7 +530,8 @@
       e.preventDefault();
       var s = nextEl.getAttribute("data-next");
       if (s === "type" && state.eventType) goTo("datum");
-      else if (s === "datum" && state.date) goTo("gegevens");
+      else if (s === "datum" && state.date) goTo("arrangement");
+      else if (s === "arrangement" && state.package) goTo("gegevens");
       else if (s === "gegevens") {
         var err = validateGegevens();
         if (err) { formError.textContent = err; formError.hidden = false; }
@@ -421,6 +553,7 @@
     });
 
     initTypeCards();
+    initArrangement();
     document.querySelector("main.wizard").addEventListener("click", onWizardClick);
     form.addEventListener("submit", function (e) { e.preventDefault(); }); // afhandeling via data-next
     newRequestBtn.addEventListener("click", resetFlow);

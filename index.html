@@ -39,8 +39,9 @@
       <ol class="stepper-nodes">
         <li class="snode" data-step="type"><button type="button" data-goto="type"><span class="snum">1</span><span class="slabel">Type</span></button></li>
         <li class="snode" data-step="datum"><button type="button" data-goto="datum"><span class="snum">2</span><span class="slabel">Datum</span></button></li>
-        <li class="snode" data-step="gegevens"><button type="button" data-goto="gegevens"><span class="snum">3</span><span class="slabel">Gegevens</span></button></li>
-        <li class="snode" data-step="controleren"><button type="button" data-goto="controleren"><span class="snum">4</span><span class="slabel">Controleren</span></button></li>
+        <li class="snode" data-step="arrangement"><button type="button" data-goto="arrangement"><span class="snum">3</span><span class="slabel">Arrangement</span></button></li>
+        <li class="snode" data-step="gegevens"><button type="button" data-goto="gegevens"><span class="snum">4</span><span class="slabel">Gegevens</span></button></li>
+        <li class="snode" data-step="controleren"><button type="button" data-goto="controleren"><span class="snum">5</span><span class="slabel">Controleren</span></button></li>
       </ol>
     </nav>
 
@@ -49,9 +50,9 @@
       <!-- ---------- STAP 1: TYPE ---------- -->
       <section class="step" data-step="type" hidden>
         <header class="step-head">
-          <p class="step-kicker">Stap 1 van 4</p>
+          <p class="step-kicker">Stap 1 van 5</p>
           <h1 class="step-title">Waarvoor reserveren jullie?</h1>
-          <p class="step-sub">Kies waar de aanvraag over gaat.</p>
+          <p class="step-sub">Kies waar de aanvraag over gaat. Het duurt ongeveer een minuut.</p>
         </header>
 
         <div class="type-grid" id="typeGrid">
@@ -91,12 +92,18 @@
             <span class="type-check" aria-hidden="true">✓</span>
           </button>
         </div>
+
+        <div class="info-chips">
+          <span class="chip"><span class="chip-ic">✓</span> Vrijblijvend aanvragen</span>
+          <span class="chip"><span class="chip-ic">↺</span> Reactie binnen 2 werkdagen</span>
+          <span class="chip"><span class="chip-ic">☺</span> Ruimte tot 180 gasten</span>
+        </div>
       </section>
 
       <!-- ---------- STAP 2: DATUM ---------- -->
       <section class="step" data-step="datum" hidden>
         <header class="step-head">
-          <p class="step-kicker">Stap 2 van 4</p>
+          <p class="step-kicker">Stap 2 van 5</p>
           <h1 class="step-title">Kies een datum</h1>
           <p class="step-sub">Tik op een dag. Dagen met een stip zijn al bezet.</p>
         </header>
@@ -130,10 +137,34 @@
         </div>
       </section>
 
+      <!-- ---------- STAP 3: ARRANGEMENT ---------- -->
+      <section class="step" data-step="arrangement" hidden>
+        <header class="step-head">
+          <p class="step-kicker">Stap 3 van 5</p>
+          <h1 class="step-title">Kies een arrangement</h1>
+          <p class="step-sub">Een startpunt — alles is later in overleg aan te passen.</p>
+        </header>
+
+        <div class="pkg-list" id="pkgList"><!-- gevuld via JS --></div>
+
+        <div class="extras card">
+          <h2 class="extras-title">Extra’s <span class="opt">(optioneel)</span></h2>
+          <div class="extra-list" id="extraList"><!-- gevuld via JS --></div>
+        </div>
+
+        <div class="price-est" id="priceEst" aria-live="polite"></div>
+        <p class="price-note">Prijzen zijn indicatief en vrijblijvend. Je betaalt niets bij het aanvragen; je ontvangt een voorstel op maat.</p>
+
+        <div class="step-actions">
+          <button type="button" class="btn btn-secondary" data-goto="datum">Vorige</button>
+          <button type="button" class="btn" data-next="arrangement" id="arrangementNext" disabled>Volgende</button>
+        </div>
+      </section>
+
       <!-- ---------- STAP 3: GEGEVENS ---------- -->
       <section class="step" data-step="gegevens" hidden>
         <header class="step-head">
-          <p class="step-kicker">Stap 3 van 4</p>
+          <p class="step-kicker">Stap 4 van 5</p>
           <h1 class="step-title">Jullie gegevens</h1>
           <p class="step-sub">Zodat we contact kunnen opnemen om te bevestigen.</p>
         </header>
@@ -173,7 +204,7 @@
       <!-- ---------- STAP 4: CONTROLEREN ---------- -->
       <section class="step" data-step="controleren" hidden>
         <header class="step-head">
-          <p class="step-kicker">Stap 4 van 4</p>
+          <p class="step-kicker">Stap 5 van 5</p>
           <h1 class="step-title">Controleer je aanvraag</h1>
           <p class="step-sub">Klopt alles? Dan versturen we hem.</p>
         </header>
