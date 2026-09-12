@@ -47,6 +47,8 @@
   var newRequestBtn = document.getElementById("newRequestBtn");
   var requestsList  = document.getElementById("requestsList");
   var toast         = document.getElementById("toast");
+  var themeToggle   = document.getElementById("themeToggle");
+  var THEME_KEY     = "morephrem_theme";
 
   // =========================================================
   //  Hulpfuncties
@@ -298,9 +300,38 @@
   }
 
   // =========================================================
+  //  Thema (licht / donker)
+  // =========================================================
+  function prefersDark() {
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+
+  function currentTheme() {
+    var attr = document.documentElement.getAttribute("data-theme");
+    if (attr) return attr;
+    return prefersDark() ? "dark" : "light";
+  }
+
+  function applyStoredTheme() {
+    var saved = null;
+    try { saved = localStorage.getItem(THEME_KEY); } catch (e) {}
+    if (saved === "dark" || saved === "light") {
+      document.documentElement.setAttribute("data-theme", saved);
+    }
+  }
+
+  function toggleTheme() {
+    var next = currentTheme() === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+  }
+
+  // =========================================================
   //  Init
   // =========================================================
   function init() {
+    if (themeToggle) themeToggle.addEventListener("click", toggleTheme);
+
     prevBtn.addEventListener("click", function () {
       if (prevBtn.disabled) return;
       viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1);
@@ -319,6 +350,9 @@
     renderCalendar();
     renderRequests();
   }
+
+  // pas een opgeslagen thema meteen toe (vóór paint) om flikkeren te voorkomen
+  applyStoredTheme();
 
   document.addEventListener("DOMContentLoaded", init);
 })();

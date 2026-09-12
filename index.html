@@ -5,37 +5,50 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Datum reserveren — Morephrem</title>
   <meta name="description" content="Kies een beschikbare datum in de agenda en vraag jullie zaal of huwelijk aan bij Morephrem." />
-
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet" />
-
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
-  <!-- ======================= COMPACTE HEADER ======================= -->
+  <!-- ======================= HEADER (Apple-stijl, translucent) ======================= -->
   <header class="bar">
     <div class="container bar-inner">
-      <a class="back" href="https://morephrem.com">‹ morephrem.com</a>
-      <h1 class="bar-title">Datum reserveren</h1>
-      <span class="bar-spacer" aria-hidden="true"></span>
+      <a class="back" href="https://morephrem.com" aria-label="Terug naar morephrem.com">
+        <span class="chev">‹</span> morephrem.com
+      </a>
+      <span class="bar-brand">Morephrem</span>
+      <button class="theme-toggle" id="themeToggle" aria-label="Wissel donker/licht thema">
+        <svg class="ic ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4.2"></circle>
+          <path d="M12 2.5v2.2M12 19.3v2.2M4.4 4.4l1.6 1.6M18 18l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.4 19.6l1.6-1.6M18 6l1.6-1.6"></path>
+        </svg>
+        <svg class="ic ic-moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>
+        </svg>
+      </button>
     </div>
   </header>
 
-  <main class="container main">
-    <p class="lead">
-      Kies hieronder een beschikbare datum en vul je aanvraag in. Wij nemen
-      binnen 2 werkdagen contact op om te bevestigen — een aanvraag is nog
-      vrijblijvend.
-    </p>
+  <main>
+    <!-- ======================= INTRO ======================= -->
+    <section class="intro container">
+      <h1>Reserveer jullie datum</h1>
+      <p class="lead">
+        Kies een beschikbare dag in de agenda en verstuur je aanvraag —
+        voor een huwelijk, feest of het huren van de zaal.
+        Vrijblijvend; we bevestigen binnen twee werkdagen.
+      </p>
+    </section>
 
-    <div class="layout">
+    <div class="container layout">
       <!-- ===================== AGENDA ===================== -->
-      <section class="calendar-card" aria-label="Agenda">
+      <section class="card calendar-card" aria-label="Agenda">
         <div class="calendar-header">
-          <button class="cal-nav" id="prevMonth" aria-label="Vorige maand">‹</button>
           <h2 class="cal-title" id="calTitle" aria-live="polite">Maand</h2>
-          <button class="cal-nav" id="nextMonth" aria-label="Volgende maand">›</button>
+          <div class="cal-controls">
+            <button class="cal-nav" id="prevMonth" aria-label="Vorige maand">‹</button>
+            <button class="cal-nav" id="nextMonth" aria-label="Volgende maand">›</button>
+          </div>
         </div>
 
         <div class="calendar-weekdays">
@@ -52,7 +65,7 @@
       </section>
 
       <!-- ===================== AANVRAAGPANEEL ===================== -->
-      <section class="panel">
+      <section class="card panel">
         <div class="chosen">
           <span class="chosen-label">Gekozen datum</span>
           <p class="chosen-date" id="selectionDate">Nog geen datum gekozen</p>
@@ -60,12 +73,12 @@
 
         <form class="request-form" id="bookingForm" novalidate>
           <div class="field">
-            <label for="fName">Naam *</label>
+            <label for="fName">Naam</label>
             <input type="text" id="fName" name="name" placeholder="Voor- en achternaam" required />
           </div>
 
           <div class="field">
-            <label for="fEventType">Waarvoor? *</label>
+            <label for="fEventType">Waarvoor?</label>
             <select id="fEventType" name="eventType" required>
               <option value="Huwelijk / bruiloft">Huwelijk / bruiloft</option>
               <option value="Zaal huren">Zaal huren</option>
@@ -76,7 +89,7 @@
 
           <div class="field-row">
             <div class="field">
-              <label for="fEmail">E-mail *</label>
+              <label for="fEmail">E-mail</label>
               <input type="email" id="fEmail" name="email" placeholder="naam@voorbeeld.nl" required />
             </div>
             <div class="field">
@@ -87,7 +100,7 @@
 
           <div class="field-row">
             <div class="field">
-              <label for="fDate">Datum *</label>
+              <label for="fDate">Datum</label>
               <input type="date" id="fDate" name="date" required />
             </div>
             <div class="field">
@@ -103,20 +116,21 @@
 
           <p class="form-error" id="formError" role="alert" hidden></p>
           <button type="submit" class="btn btn-block">Aanvraag versturen</button>
+          <p class="form-note">Verplicht: naam, e-mail en datum.</p>
         </form>
 
         <!-- Bevestiging -->
         <div class="confirmation" id="confirmation" hidden>
-          <div class="confirmation-icon">✓</div>
+          <div class="confirmation-icon" aria-hidden="true">✓</div>
           <h3>Aanvraag ontvangen</h3>
           <p id="confirmationText"></p>
-          <button class="btn btn-ghost btn-block" id="newRequestBtn">Nieuwe aanvraag</button>
+          <button class="btn btn-secondary btn-block" id="newRequestBtn">Nieuwe aanvraag</button>
         </div>
       </section>
     </div>
 
     <!-- ===================== JOUW AANVRAGEN ===================== -->
-    <section class="requests-section">
+    <section class="container requests-section">
       <h2 class="requests-title">Jouw aanvragen</h2>
       <div id="requestsList" class="requests-list"></div>
     </section>
